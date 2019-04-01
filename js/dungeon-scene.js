@@ -169,6 +169,7 @@ export default class DungeonScene extends Phaser.Scene {
     camera.startFollow(this.player.sprite);
 
     // Help text that has a "fixed" position on the screen
+    //mision indicator
     this.add
       .text(16, 16, `Mision: Encuentra las escaleras.\nNivel actual: ${this.level}`, {
         font: "18px monospace",
@@ -178,8 +179,8 @@ export default class DungeonScene extends Phaser.Scene {
       })
       .setScrollFactor(0);
 
-      this.add
-      .text(450, 16, `Vida.\nNivel actual: ${this.life}%`, {
+      //life indicator
+      this.add.text(450, 16, `Vida.\nNivel actual: ${this.life}%`, {
         font: "18px monospace",
         fill: "#000000",
         padding: { x: 20, y: 10 },
