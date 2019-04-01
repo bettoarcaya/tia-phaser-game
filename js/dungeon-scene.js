@@ -9,6 +9,7 @@ export default class DungeonScene extends Phaser.Scene {
   constructor() {
     super({key: "DungeonScene"});
     this.level = 0;
+    this.life = 100;
   }
 
   preload() {
@@ -169,7 +170,16 @@ export default class DungeonScene extends Phaser.Scene {
 
     // Help text that has a "fixed" position on the screen
     this.add
-      .text(16, 16, `Encuentra las escaleras.\nNivel actual: ${this.level}`, {
+      .text(16, 16, `Mision: Encuentra las escaleras.\nNivel actual: ${this.level}`, {
+        font: "18px monospace",
+        fill: "#000000",
+        padding: { x: 20, y: 10 },
+        backgroundColor: "#ffffff"
+      })
+      .setScrollFactor(0);
+
+      this.add
+      .text(450, 16, `Vida.\nNivel actual: ${this.life}%`, {
         font: "18px monospace",
         fill: "#000000",
         padding: { x: 20, y: 10 },
