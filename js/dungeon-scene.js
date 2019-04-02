@@ -139,6 +139,7 @@ export default class DungeonScene extends Phaser.Scene {
     this.groundLayer.setCollisionByExclusion([-1, 6, 7, 8, 26]);
     this.stuffLayer.setCollisionByExclusion([-1, 6, 7, 8, 26]);
 
+    
     this.stuffLayer.setTileIndexCallback(TILES.STAIRS, () => {
       this.stuffLayer.setTileIndexCallback(TILES.STAIRS, null);
       this.hasPlayerReachedStairs = true;
@@ -149,6 +150,20 @@ export default class DungeonScene extends Phaser.Scene {
         this.player.destroy();
         this.scene.restart();
       });
+    });
+
+    this.stuffLayer.setTileIndexCallback(TILES.CHEST, () => {
+      this.stuffLayer.setTileIndexCallback(TILES.CHEST, null);
+      this.player.hasWeapon = true;
+      alert(this.player.hasWeapon);
+      /*this.hasPlayerReachedStairs = true;
+      this.player.freeze();
+      const cam = this.cameras.main;
+      cam.fade(250, 0, 0, 0);
+      cam.once("camerafadeoutcomplete", () => {
+        this.player.destroy();
+        this.scene.restart();
+      });*/
     });
 
     // Place the player in the first room
@@ -181,6 +196,15 @@ export default class DungeonScene extends Phaser.Scene {
 
       //life indicator
       this.add.text(450, 16, `Vida.\nNivel actual: ${this.life}%`, {
+        font: "18px monospace",
+        fill: "#000000",
+        padding: { x: 20, y: 10 },
+        backgroundColor: "#ffffff"
+      })
+      .setScrollFactor(0);
+
+      //weapon indicator
+      this.add.text(720, 16, `Arma.\narma actual: ${this.player.hasWeapon}`, {
         font: "18px monospace",
         fill: "#000000",
         padding: { x: 20, y: 10 },

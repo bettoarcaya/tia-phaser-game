@@ -1,5 +1,7 @@
 export default class Player {
   constructor(scene, x, y) {
+    this.hasWeapon = false;
+    
     this.scene = scene;
 
     const anims = scene.anims;
@@ -28,6 +30,10 @@ export default class Player {
 
   freeze() {
     this.sprite.body.moves = false;
+  }
+
+  create(){
+    this.hasWeapon = false;
   }
 
   update() {
