@@ -196,14 +196,16 @@ export default class DungeonScene extends Phaser.Scene {
       .setScrollFactor(0);
 
       //life indicator
-      this.add.text(450, 16, `Vida.\nNivel actual: ${this.life}%`, {
+      this.setLife(100);
+      /*this.add.text(450, 16, `Vida.\nNivel actual: ${this.life}%`, {
         font: "18px monospace",
         fill: "#000000",
         padding: { x: 20, y: 10 },
         backgroundColor: "#ffffff"
       })
-      .setScrollFactor(0);
+      .setScrollFactor(0);*/
 
+      //weapon indicator
       this.setWeapon("");
       /*this.add.text(720, 16, `Arma.\narma actual: ${this.weapon}`, {
         font: "18px monospace",
@@ -214,7 +216,7 @@ export default class DungeonScene extends Phaser.Scene {
       .setScrollFactor(0);*/
   }
 
-  //weapon indicator
+  //seting weapon indicator
   setWeapon(weaponName){
     this.weapon = weaponName;
       this.add.text(720, 16, `Arma.\narma actual: ${this.weapon}`, {
@@ -224,6 +226,18 @@ export default class DungeonScene extends Phaser.Scene {
         backgroundColor: "#ffffff"
       })
       .setScrollFactor(0);
+  }
+
+  //seting life indicator
+  setLife(lifePercent){
+    this.life = lifePercent;
+    this.add.text(450, 16, `Vida.\nNivel actual: ${this.life}%`, {
+      font: "18px monospace",
+      fill: "#000000",
+      padding: { x: 20, y: 10 },
+      backgroundColor: "#ffffff"
+    })
+    .setScrollFactor(0);
   }
 
   update(time, delta) {
