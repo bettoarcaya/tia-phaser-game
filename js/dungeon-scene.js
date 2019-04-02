@@ -10,6 +10,7 @@ export default class DungeonScene extends Phaser.Scene {
     super({key: "DungeonScene"});
     this.level = 0;
     this.life = 100;
+    this.weapon = "";
   }
 
   preload() {
@@ -203,8 +204,20 @@ export default class DungeonScene extends Phaser.Scene {
       })
       .setScrollFactor(0);
 
-      //weapon indicator
-      this.add.text(720, 16, `Arma.\narma actual: ${this.player.hasWeapon}`, {
+      this.setWeapon("");
+      /*this.add.text(720, 16, `Arma.\narma actual: ${this.weapon}`, {
+        font: "18px monospace",
+        fill: "#000000",
+        padding: { x: 20, y: 10 },
+        backgroundColor: "#ffffff"
+      })
+      .setScrollFactor(0);*/
+  }
+
+  //weapon indicator
+  setWeapon(weaponName){
+    this.weapon = weaponName;
+      this.add.text(720, 16, `Arma.\narma actual: ${this.weapon}`, {
         font: "18px monospace",
         fill: "#000000",
         padding: { x: 20, y: 10 },
@@ -215,7 +228,7 @@ export default class DungeonScene extends Phaser.Scene {
 
   update(time, delta) {
     if (this.hasPlayerReachedStairs) return;
-
+    if(this.player.hasWeapon) this.setWeapon("arma");
     this.player.update();
 
     // Find the player's room using another helper method from the dungeon that converts from
