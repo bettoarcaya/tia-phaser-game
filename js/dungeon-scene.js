@@ -140,7 +140,7 @@ export default class DungeonScene extends Phaser.Scene {
     this.groundLayer.setCollisionByExclusion([-1, 6, 7, 8, 26]);
     this.stuffLayer.setCollisionByExclusion([-1, 6, 7, 8, 26]);
 
-    
+    //find a stairs
     this.stuffLayer.setTileIndexCallback(TILES.STAIRS, () => {
       this.stuffLayer.setTileIndexCallback(TILES.STAIRS, null);
       this.hasPlayerReachedStairs = true;
@@ -153,10 +153,11 @@ export default class DungeonScene extends Phaser.Scene {
       });
     });
 
+    //find a chest
     this.stuffLayer.setTileIndexCallback(TILES.CHEST, () => {
       this.stuffLayer.setTileIndexCallback(TILES.CHEST, null);
       this.player.hasWeapon = true;
-      alert(this.player.hasWeapon);
+      alert(TILES.CHESTWEAPONS[Math.floor(Math.random() * (3 - 0)) + 0]);
       /*this.hasPlayerReachedStairs = true;
       this.player.freeze();
       const cam = this.cameras.main;

@@ -38,7 +38,8 @@ const TILE_MAPPING = {
   TOWER: [
     [186],
     [205]
-  ]
+  ],
+  CHESTWEAPONS: ["arma1", "arma2", "arma3"]
 };
 
 export default TILE_MAPPING;
