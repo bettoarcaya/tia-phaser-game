@@ -157,7 +157,8 @@ export default class DungeonScene extends Phaser.Scene {
     this.stuffLayer.setTileIndexCallback(TILES.CHEST, () => {
       this.stuffLayer.setTileIndexCallback(TILES.CHEST, null);
       this.player.hasWeapon = true;
-      alert(TILES.CHESTWEAPONS[Math.floor(Math.random() * (3 - 0)) + 0]);
+      this.weapon = TILES.CHESTWEAPONS[Math.floor(Math.random() * (3 - 0)) + 0];
+      alert("Has encontrado un " + this.weapon);
       /*this.hasPlayerReachedStairs = true;
       this.player.freeze();
       const cam = this.cameras.main;
@@ -243,7 +244,7 @@ export default class DungeonScene extends Phaser.Scene {
 
   update(time, delta) {
     if (this.hasPlayerReachedStairs) return;
-    if(this.player.hasWeapon) this.setWeapon("arma");
+    if(this.player.hasWeapon) this.setWeapon(this.weapon);
     this.player.update();
 
     // Find the player's room using another helper method from the dungeon that converts from
