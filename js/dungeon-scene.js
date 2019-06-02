@@ -25,6 +25,24 @@ export default class DungeonScene extends Phaser.Scene {
         spacing: 2
       }
     );
+    this.load.spritesheet(
+      "antifairy",
+      "assets/spritesheets/antifairy2.png",
+      {
+        frameWidth: 21,
+        frameHeight : 21
+
+      }
+    );
+    this.load.spritesheet(
+      "bladetrap",
+      "assets/spritesheets/bladeTrap.png",
+      {
+        frameWidth: 21,
+        frameHeight : 22
+
+      }
+    );
   }
 
   create() {
@@ -169,15 +187,68 @@ export default class DungeonScene extends Phaser.Scene {
       });*/
     });
 
+    
+      this.anims.create({
+        key: 'enemigo1',
+        frames: this.anims.generateFrameNumbers('antifairy', { start: 0, end: 4 }),
+        frameRate: 5,
+        repeat: -1
+      });
+
+      this.anims.create({
+        key: 'enemigo2',
+        frames: this.anims.generateFrameNumbers('bladetrap', { start: 0, end: 0 }),
+        frameRate: 5,
+        repeat: -1
+      });
+      
+
     // Place the player in the first room
     const playerRoom = startRoom;
     const x = map.tileToWorldX(playerRoom.centerX);
     const y = map.tileToWorldY(playerRoom.centerY);
     this.player = new Player(this, x, y);
 
+    this.enemigo1 = this.physics.add.sprite(x, y-30, 'enemigo1');
+    this.enemigo1.anims.play('enemigo1',true);
+
+    this.enemigo2 = this.physics.add.sprite(x+50,y,'enemigo2');
+    this.enemigo2.anims.play('enemigo2',true);
+    
+
     // Watch the player and tilemap layers for collisions, for the duration of the scene:
     this.physics.add.collider(this.player.sprite, this.groundLayer);
     this.physics.add.collider(this.player.sprite, this.stuffLayer);
+
+
+    //colider para la antiHada
+    this.physics.add.collider(this.enemigo1, this.groundLayer);    
+    this.physics.add.collider(this.enemigo1,this.player);
+
+    //colider para las puyitas(bladetrap)
+    this.physics.add.collider(this.enemigo2,this.groundLayer);
+    this.physics.add.collider(this.enemigo2,this.player);
+    this.physics.add.collider(this.enemigo2, this.stuffLayer);
+
+
+    this.physics.add.overlap(this.player.sprite, this.enemigo1 , ()=>{
+        this.setLife(420);
+    });
+
+    this.physics.add.overlap(this.player.sprite, this.enemigo2 , ()=>{
+        this.setLife(-5);
+    });
+
+
+    this.enemigo2.move = this.tweens.add({
+      targets: this.enemigo2,
+      y: playerRoom.height,
+      ease: 'Linear',
+      duration: 2000,
+      repeat: -1,
+      yoyo: true
+    });
+
 
     // Phaser supports multiple cameras, but you can access the default camera like this:
     const camera = this.cameras.main;
@@ -215,7 +286,7 @@ export default class DungeonScene extends Phaser.Scene {
         padding: { x: 20, y: 10 },
         backgroundColor: "#ffffff"
       })
-      .setScrollFactor(0);*/
+      .setScrollFactor(0);*/      
   }
 
   //seting weapon indicator
