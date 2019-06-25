@@ -34,7 +34,17 @@ export default class DungeonScene extends Phaser.Scene {
         frameHeight : 21
 
       }
-    );        
+    );
+    this.load.spritesheet(
+      "insecto",
+      "assets/spritesheets/insecto.png",
+      {
+        frameWidth: 65,
+        frameHeight : 64
+
+      }
+    );    
+
     /*this.load.spritesheet(
       "bladetrap",
       "assets/spritesheets/bladeTrap.png",
@@ -45,6 +55,14 @@ export default class DungeonScene extends Phaser.Scene {
       }
     );*/
     this.load.image("bladetrap","assets/spritesheets/bladeTrap.png");
+
+    this.load.audio('dust', [
+        'assets/audio/Dust [Hotline Miami 2 OST]-M.O.O.N..mp3'
+    ]);
+
+    this.load.audio('mpa', [
+        'assets/audio/Musikk per automatikk (Hotline Miami OST)-Elliot Berlin.mp3'
+    ]);
   }
 
   create() {
@@ -131,17 +149,16 @@ export default class DungeonScene extends Phaser.Scene {
     // Place the stairs
     this.stuffLayer.putTileAt(TILES.STAIRS, endRoom.centerX, endRoom.centerY);
 
-    this.anims.create({
-      key: "rey",
-      frames: this.anims.generateFrameNumbers("characters", { start: 23, end: 26 }),
-      frameRate: 8,
-      repeat: -1
-    });
-
+    
     // Place stuff in the 90% "otherRooms"
     var trono = true;
+    var rx,ry,epx,epy;   
     otherRooms.forEach(room => {
       var rand = Math.random();
+      if(!trono && epx == null){
+        epx=map.tileToWorldX(room.left)+5;
+        epy=map.tileToWorldX(room.bottom);
+      }
       if (rand <= 0.25) {
         // 25% chance of chest
         this.stuffLayer.putTileAt(TILES.CHEST, room.centerX, room.centerY);
@@ -159,12 +176,9 @@ export default class DungeonScene extends Phaser.Scene {
           this.stuffLayer.putTilesAt(TILES.TOWER, room.centerX + 1, room.centerY - 2);
 
           if(trono){            
-            var x = map.tileToWorldX(room.centerX)+25;
-            var y = map.tileToWorldY(room.centerY)+15;
-            this.rey=this.physics.add.sprite(x, y, 'rey');            
-            this.rey.anims.play('rey',true);
-            console.log(this.rey);
-            trono=false;
+            rx = map.tileToWorldX(room.centerX)+25;
+            ry = map.tileToWorldY(room.centerY)+15;            
+            trono=false;            
           }
           
 
@@ -174,6 +188,12 @@ export default class DungeonScene extends Phaser.Scene {
         }
       }
     });
+    
+    this.reyX=rx;
+    this.reyY=ry;
+
+    this.insectoX=epx;
+    this.insectoY=epy;
 
     // Not exactly correct for the tileset since there are more possible floor tiles, but this will
     // do for the example.
@@ -209,10 +229,27 @@ export default class DungeonScene extends Phaser.Scene {
       });*/
     });
 
-    
+      this.anims.create({
+      key: "rey",
+      frames: this.anims.generateFrameNumbers("characters", { start: 23, end: 26 }),
+      frameRate: 8,
+      repeat: -1
+      });
+      this.anims.create({
+        key: "player-walk",
+        frames: this.anims.generateFrameNumbers("characters", { start: 46, end: 49 }),
+        frameRate: 8,
+        repeat: -1
+      });
       this.anims.create({
         key: 'enemigo1',
         frames: this.anims.generateFrameNumbers('antifairy', { start: 0, end: 4 }),
+        frameRate: 15,
+        repeat: -1
+      });
+      this.anims.create({
+        key: 'enemigo2',
+        frames: this.anims.generateFrameNumbers('insecto', { start: 0, end: 7 }),
         frameRate: 15,
         repeat: -1
       });
@@ -277,6 +314,15 @@ export default class DungeonScene extends Phaser.Scene {
       repeat: -1,
       yoyo: true
     });
+    var titulo= new Array();
+    titulo.push('dust');
+    titulo.push('mpa');
+    this.music = this.sound.add(titulo[Math.floor(Math.random() * titulo.length)]);
+    this.music.config.loop=true;
+    this.music.play();
+    
+
+    
 
 
     // Phaser supports multiple cameras, but you can access the default camera like this:
@@ -343,8 +389,31 @@ export default class DungeonScene extends Phaser.Scene {
     .setScrollFactor(0);
   } 
 
+  //esta misma aplicacara para poner a los mounstros en un cuarto 
+  //y que aparezcan sin que el jugador lo vea venir
+
+  invocarRey(){
+    this.rey=this.physics.add.sprite(this.reyX, this.reyY, 'rey');            
+    this.rey.anims.play('rey',true);        
+    //alert("aprieten bien ese culo...\n que lo que viene es candela"); 
+
+  }
+
+  invocarBicho(){
+    this.insecto=this.physics.add.sprite(this.insectoX+30, this.insectoY-30, 'enemigo2');            
+    this.insecto.anims.play('enemigo2',true);
+    this.physics.add.collider(this.insecto,this.groundLayer);        
+    //alert("aprieten bien ese culo...\n que lo que viene es candela"); 
+
+  }
+
+
+
   update(time, delta) {
-    if (this.hasPlayerReachedStairs) return;
+    if (this.hasPlayerReachedStairs){
+      this.music.stop();
+      return;
+    } 
     if(this.player.hasWeapon) this.setWeapon(this.weapon);
     this.player.update();
 
@@ -354,14 +423,23 @@ export default class DungeonScene extends Phaser.Scene {
     const playerTileY = this.groundLayer.worldToTileY(this.player.sprite.y);
     const playerRoom  = this.dungeon.getRoomAt(playerTileX, playerTileY);
     if(this.encuentro){
-      const palacioTileX = this.groundLayer.worldToTileX(this.rey.x);
-      const palacioTileY = this.groundLayer.worldToTileY(this.rey.y);
+      const palacioTileX = this.groundLayer.worldToTileX(this.reyX);
+      const palacioTileY = this.groundLayer.worldToTileY(this.reyY);
       const palacio     = this.dungeon.getRoomAt(palacioTileX, palacioTileY);
       if(palacio==playerRoom){
-        alert("aprieten bien ese culo...\n que lo que viene es candela");
-        this.encuentro=false;
+        this.invocarRey();
+        this.encuentro=false;        
       }
     }
+    if(this.insecto==null){
+      const colmenaTileX = this.groundLayer.worldToTileX(this.insectoX);
+      const colmenaTileY = this.groundLayer.worldToTileY(this.insectoY);
+      const colmena     = this.dungeon.getRoomAt(colmenaTileX, colmenaTileY);
+      if(colmena==playerRoom){
+        this.invocarBicho();      
+      }
+    }
+    
     this.tilemapVisibility.setActiveRoom(playerRoom);
   }
 }
