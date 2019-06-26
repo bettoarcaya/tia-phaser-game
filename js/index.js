@@ -12,8 +12,8 @@ import DungeonScene from "./dungeon-scene.js";
 
 const config = {
   type: Phaser.AUTO,
-  width: screen.width,
-  height: screen.height,
+  width: screen.width - 100,
+  height: screen.height - 150,
   backgroundColor: "#000",
   parent: "game-container",
   pixelArt: true,

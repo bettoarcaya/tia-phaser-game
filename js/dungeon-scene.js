@@ -429,6 +429,7 @@ export default class DungeonScene extends Phaser.Scene {
       const palacio     = this.dungeon.getRoomAt(palacioTileX, palacioTileY);
       if(palacio==playerRoom){
         this.invocarRey();
+        alert("has encontrado al rey");
         this.encuentro=false;        
       }
     }
