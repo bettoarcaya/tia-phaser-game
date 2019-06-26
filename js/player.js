@@ -32,6 +32,10 @@ export default class Player {
     this.sprite.body.moves = false;
   }
 
+  heat(){
+   this.sprite.body.moves = true; 
+  }
+
   create(){
     this.hasWeapon = false;
   }

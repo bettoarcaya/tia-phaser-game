@@ -1,6 +1,7 @@
 import Player from "./player.js";
 import TILES from "./tile-mapping.js";
 import TilemapVisibility from "./tilemap-visibility.js";
+import King from "./rey.js";
 
 /**
  * Scene that generates a new dungeon
@@ -12,7 +13,7 @@ export default class DungeonScene extends Phaser.Scene {
     this.life = 100;
     this.weapon = "";
   }
-
+  
   preload() {
     this.load.image("tiles", "assets/tilesets/buch-tileset-48px-extruded.png");
     this.load.spritesheet(
@@ -25,6 +26,43 @@ export default class DungeonScene extends Phaser.Scene {
         spacing: 2
       }
     );
+    this.load.spritesheet(
+      "antifairy",
+      "assets/spritesheets/antifairy2.png",
+      {
+        frameWidth: 21,
+        frameHeight : 21
+
+      }
+    );
+    this.load.spritesheet(
+      "insecto",
+      "assets/spritesheets/insecto.png",
+      {
+        frameWidth: 65,
+        frameHeight : 64
+
+      }
+    );    
+
+    /*this.load.spritesheet(
+      "bladetrap",
+      "assets/spritesheets/bladeTrap.png",
+      {
+        frameWidth: 21,
+        frameHeight : 22
+
+      }
+    );*/
+    this.load.image("bladetrap","assets/spritesheets/bladeTrap.png");
+
+    this.load.audio('dust', [
+        'assets/audio/Dust [Hotline Miami 2 OST]-M.O.O.N..mp3'
+    ]);
+
+    this.load.audio('mpa', [
+        'assets/audio/Musikk per automatikk (Hotline Miami OST)-Elliot Berlin.mp3'
+    ]);
   }
 
   create() {
@@ -63,6 +101,7 @@ export default class DungeonScene extends Phaser.Scene {
 
     // Use the array of rooms generated to place tiles in the map
     // Note: using an arrow function here so that "this" still refers to our scene
+
     this.dungeon.rooms.forEach(room => {
       const { x, y, width, height, left, right, top, bottom } = room;
 
@@ -110,9 +149,16 @@ export default class DungeonScene extends Phaser.Scene {
     // Place the stairs
     this.stuffLayer.putTileAt(TILES.STAIRS, endRoom.centerX, endRoom.centerY);
 
+    
     // Place stuff in the 90% "otherRooms"
+    var trono = true;
+    var rx,ry,epx,epy;   
     otherRooms.forEach(room => {
       var rand = Math.random();
+      if(!trono && epx == null){
+        epx=map.tileToWorldX(room.left)+5;
+        epy=map.tileToWorldX(room.bottom);
+      }
       if (rand <= 0.25) {
         // 25% chance of chest
         this.stuffLayer.putTileAt(TILES.CHEST, room.centerX, room.centerY);
@@ -128,12 +174,26 @@ export default class DungeonScene extends Phaser.Scene {
           this.stuffLayer.putTilesAt(TILES.TOWER, room.centerX + 1, room.centerY + 1);
           this.stuffLayer.putTilesAt(TILES.TOWER, room.centerX - 1, room.centerY - 2);
           this.stuffLayer.putTilesAt(TILES.TOWER, room.centerX + 1, room.centerY - 2);
+
+          if(trono){            
+            rx = map.tileToWorldX(room.centerX)+25;
+            ry = map.tileToWorldY(room.centerY)+15;            
+            trono=false;            
+          }
+          
+
         } else {
           this.stuffLayer.putTilesAt(TILES.TOWER, room.centerX - 1, room.centerY - 1);
           this.stuffLayer.putTilesAt(TILES.TOWER, room.centerX + 1, room.centerY - 1);
         }
       }
     });
+    
+    this.reyX=rx;
+    this.reyY=ry;
+
+    this.insectoX=epx;
+    this.insectoY=epy;
 
     // Not exactly correct for the tileset since there are more possible floor tiles, but this will
     // do for the example.
@@ -169,15 +229,101 @@ export default class DungeonScene extends Phaser.Scene {
       });*/
     });
 
+      this.anims.create({
+      key: "rey",
+      frames: this.anims.generateFrameNumbers("characters", { start: 23, end: 26 }),
+      frameRate: 8,
+      repeat: -1
+      });
+      this.anims.create({
+        key: "player-walk",
+        frames: this.anims.generateFrameNumbers("characters", { start: 46, end: 49 }),
+        frameRate: 8,
+        repeat: -1
+      });
+      this.anims.create({
+        key: 'enemigo1',
+        frames: this.anims.generateFrameNumbers('antifairy', { start: 0, end: 4 }),
+        frameRate: 15,
+        repeat: -1
+      });
+      this.anims.create({
+        key: 'enemigo2',
+        frames: this.anims.generateFrameNumbers('insecto', { start: 0, end: 7 }),
+        frameRate: 15,
+        repeat: -1
+      });
+      
+      /*this.anims.create({
+        key: 'enemigo2',
+        frames: this.anims.generateFrameNumbers('bladetrap', { start: 0, end: 0 }),
+        frameRate: 5,
+        repeat: -1
+      });*/
+      
+
+
     // Place the player in the first room
     const playerRoom = startRoom;
     const x = map.tileToWorldX(playerRoom.centerX);
     const y = map.tileToWorldY(playerRoom.centerY);
     this.player = new Player(this, x, y);
 
+    this.enemigo1 = this.physics.add.sprite(x+50, y-30, 'enemigo1');
+    this.enemigo1.anims.play('enemigo1',true);
+
+    this.enemigo2 = this.physics.add.sprite(x+50,y,'bladetrap');
+    //this.enemigo2.anims.play('enemigo2',true);
+    
+
     // Watch the player and tilemap layers for collisions, for the duration of the scene:
     this.physics.add.collider(this.player.sprite, this.groundLayer);
     this.physics.add.collider(this.player.sprite, this.stuffLayer);
+
+
+    //colider para la antiHada
+    this.physics.add.collider(this.enemigo1, this.groundLayer);    
+    this.physics.add.collider(this.enemigo1,this.player.sprite);
+
+    //colider para las puyitas(bladetrap)
+    this.physics.add.collider(this.enemigo2,this.groundLayer);
+    this.physics.add.collider(this.enemigo2,this.player);
+  //  this.physics.add.collider(this.enemigo2, this.stuffLayer);
+
+
+    this.physics.add.overlap(this.player.sprite, this.enemigo1 , ()=>{
+        this.setLife(420);
+    });
+
+    this.physics.add.overlap(this.player.sprite, this.enemigo2 , ()=>{
+        this.setLife(-5);
+    });
+
+    
+    //enemigo2.body.collideWorldBounds = true;
+
+    //enemigo2.body.bounce.setTo(0.15, 0.8);
+
+
+    this.enemigo1.move = this.tweens.add({
+      targets: this.enemigo1,
+      y: y + 180,      
+      x: x + 120,
+      ease: 'Linear',
+      duration: 2000,
+      repeat: -1,
+      yoyo: true
+    });
+    var titulo= new Array();
+    titulo.push('dust');
+    titulo.push('mpa');
+    this.music = this.sound.add(titulo[Math.floor(Math.random() * titulo.length)]);
+    this.music.config.loop=true;
+    this.music.play();
+    
+
+    
+
 
     // Phaser supports multiple cameras, but you can access the default camera like this:
     const camera = this.cameras.main;
@@ -215,7 +361,8 @@ export default class DungeonScene extends Phaser.Scene {
         padding: { x: 20, y: 10 },
         backgroundColor: "#ffffff"
       })
-      .setScrollFactor(0);*/
+      .setScrollFactor(0);*/ 
+      this.encuentro=true;     
   }
 
   //seting weapon indicator
@@ -240,10 +387,34 @@ export default class DungeonScene extends Phaser.Scene {
       backgroundColor: "#ffffff"
     })
     .setScrollFactor(0);
+  } 
+
+  //esta misma aplicacara para poner a los mounstros en un cuarto 
+  //y que aparezcan sin que el jugador lo vea venir
+
+  invocarRey(){
+    this.rey=this.physics.add.sprite(this.reyX, this.reyY, 'rey');            
+    this.rey.anims.play('rey',true);        
+    //alert("aprieten bien ese culo...\n que lo que viene es candela"); 
+
   }
 
+  invocarBicho(){
+    this.insecto=this.physics.add.sprite(this.insectoX+30, this.insectoY-30, 'enemigo2');            
+    this.insecto.anims.play('enemigo2',true);
+    this.physics.add.collider(this.insecto,this.groundLayer);        
+    //alert("aprieten bien ese culo...\n que lo que viene es candela");
+	console.log(this.insectoX+30, this.insectoY-30); 
+
+  }
+
+
+
   update(time, delta) {
-    if (this.hasPlayerReachedStairs) return;
+    if (this.hasPlayerReachedStairs){
+      this.music.stop();
+      return;
+    } 
     if(this.player.hasWeapon) this.setWeapon(this.weapon);
     this.player.update();
 
@@ -251,8 +422,25 @@ export default class DungeonScene extends Phaser.Scene {
     // dungeon XY (in grid units) to the corresponding room object
     const playerTileX = this.groundLayer.worldToTileX(this.player.sprite.x);
     const playerTileY = this.groundLayer.worldToTileY(this.player.sprite.y);
-    const playerRoom = this.dungeon.getRoomAt(playerTileX, playerTileY);
-
+    const playerRoom  = this.dungeon.getRoomAt(playerTileX, playerTileY);
+    if(this.encuentro){
+      const palacioTileX = this.groundLayer.worldToTileX(this.reyX);
+      const palacioTileY = this.groundLayer.worldToTileY(this.reyY);
+      const palacio     = this.dungeon.getRoomAt(palacioTileX, palacioTileY);
+      if(palacio==playerRoom){
+        this.invocarRey();
+        this.encuentro=false;        
+      }
+    }
+    if(this.insecto==null){
+      const colmenaTileX = this.groundLayer.worldToTileX(this.insectoX);
+      const colmenaTileY = this.groundLayer.worldToTileY(this.insectoY);
+      const colmena     = this.dungeon.getRoomAt(colmenaTileX, colmenaTileY);
+      if(colmena==playerRoom){
+        this.invocarBicho();      
+      }
+    }
+    
     this.tilemapVisibility.setActiveRoom(playerRoom);
   }
 }
