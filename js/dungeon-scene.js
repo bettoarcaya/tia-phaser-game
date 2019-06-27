@@ -27,15 +27,6 @@ export default class DungeonScene extends Phaser.Scene {
       }
     );
     this.load.spritesheet(
-      "antifairy",
-      "assets/spritesheets/antifairy2.png",
-      {
-        frameWidth: 21,
-        frameHeight : 21
-
-      }
-    );
-    this.load.spritesheet(
       "insecto",
       "assets/spritesheets/insecto.png",
       {
@@ -43,18 +34,7 @@ export default class DungeonScene extends Phaser.Scene {
         frameHeight : 64
 
       }
-    );    
-
-    /*this.load.spritesheet(
-      "bladetrap",
-      "assets/spritesheets/bladeTrap.png",
-      {
-        frameWidth: 21,
-        frameHeight : 22
-
-      }
-    );*/
-    this.load.image("bladetrap","assets/spritesheets/bladeTrap.png");
+    );      
 
     this.load.audio('dust', [
         'assets/audio/Dust [Hotline Miami 2 OST]-M.O.O.N..mp3'
@@ -62,6 +42,14 @@ export default class DungeonScene extends Phaser.Scene {
 
     this.load.audio('mpa', [
         'assets/audio/Musikk per automatikk (Hotline Miami OST)-Elliot Berlin.mp3'
+    ]);
+
+    this.load.audio('dancin', [
+        'assets/audio/Dancin (KRONO Remix edited)-Aaron Smith.mp3'
+    ]);
+
+    this.load.audio('moon', [
+        'assets/audio/DuckTales (NES)-The Moon Theme.mp3'
     ]);
   }
 
@@ -242,24 +230,11 @@ export default class DungeonScene extends Phaser.Scene {
         repeat: -1
       });
       this.anims.create({
-        key: 'enemigo1',
-        frames: this.anims.generateFrameNumbers('antifairy', { start: 0, end: 4 }),
-        frameRate: 15,
-        repeat: -1
-      });
-      this.anims.create({
         key: 'enemigo2',
         frames: this.anims.generateFrameNumbers('insecto', { start: 0, end: 7 }),
         frameRate: 15,
         repeat: -1
       });
-      
-      /*this.anims.create({
-        key: 'enemigo2',
-        frames: this.anims.generateFrameNumbers('bladetrap', { start: 0, end: 0 }),
-        frameRate: 5,
-        repeat: -1
-      });*/
       
 
 
@@ -269,54 +244,24 @@ export default class DungeonScene extends Phaser.Scene {
     const y = map.tileToWorldY(playerRoom.centerY);
     this.player = new Player(this, x, y);
 
-    this.enemigo1 = this.physics.add.sprite(x+50, y-30, 'enemigo1');
-    this.enemigo1.anims.play('enemigo1',true);
-
-    this.enemigo2 = this.physics.add.sprite(x+50,y,'bladetrap');
-    //this.enemigo2.anims.play('enemigo2',true);
-    
+        
 
     // Watch the player and tilemap layers for collisions, for the duration of the scene:
     this.physics.add.collider(this.player.sprite, this.groundLayer);
     this.physics.add.collider(this.player.sprite, this.stuffLayer);
 
 
-    //colider para la antiHada
-    this.physics.add.collider(this.enemigo1, this.groundLayer);    
-    this.physics.add.collider(this.enemigo1,this.player.sprite);
 
-    //colider para las puyitas(bladetrap)
-    this.physics.add.collider(this.enemigo2,this.groundLayer);
-    this.physics.add.collider(this.enemigo2,this.player);
-  //  this.physics.add.collider(this.enemigo2, this.stuffLayer);
-
-
-    this.physics.add.overlap(this.player.sprite, this.enemigo1 , ()=>{
+    /*this.physics.add.overlap(this.insecto,this.player.sprite , ()=>{
         this.setLife(420);
-    });
-
-    this.physics.add.overlap(this.player.sprite, this.enemigo2 , ()=>{
-        this.setLife(-5);
-    });
-
-    
-    //enemigo2.body.collideWorldBounds = true;
-
-    //enemigo2.body.bounce.setTo(0.15, 0.8);
+    });*/
 
 
-    this.enemigo1.move = this.tweens.add({
-      targets: this.enemigo1,
-      y: y + 180,      
-      x: x + 120,
-      ease: 'Linear',
-      duration: 2000,
-      repeat: -1,
-      yoyo: true
-    });
     var titulo= new Array();
     titulo.push('dust');
     titulo.push('mpa');
+    titulo.push('dancin');
+    titulo.push('moon');
     this.music = this.sound.add(titulo[Math.floor(Math.random() * titulo.length)]);
     this.music.config.loop=true;
     this.music.play();
@@ -400,9 +345,12 @@ export default class DungeonScene extends Phaser.Scene {
   }
 
   invocarBicho(){
-    this.insecto=this.physics.add.sprite(this.insectoX+30, this.insectoY-30, 'enemigo2');            
+    this.insecto=this.physics.add.sprite(this.insectoX+60, this.insectoY-60, 'enemigo2');            
     this.insecto.anims.play('enemigo2',true);
-    this.physics.add.collider(this.insecto,this.groundLayer);        
+    this.physics.add.collider(this.insecto,this.groundLayer);
+    this.physics.add.collider(this.insecto, this.stuffLayer);
+    this.insecto.setVelocity(80, 80);    
+    this.insecto.setBounce(1, 1);        
     //alert("aprieten bien ese culo...\n que lo que viene es candela"); 
 
   }
