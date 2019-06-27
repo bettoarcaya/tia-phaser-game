@@ -180,9 +180,15 @@ export default class DungeonScene extends Phaser.Scene {
         }
       }
     });
+
+        var obj = {x: map.tileToWorldX(endRoom.left)+5, y: map.tileToWorldX(endRoom.bottom)};
+        arr.push(obj);
     
     this.reyX=rx;
     this.reyY=ry;
+
+    this.endRoom=endRoom;
+    this.borralo=false;
 
     this.restantes=arr;
 
@@ -195,6 +201,7 @@ export default class DungeonScene extends Phaser.Scene {
     this.stuffLayer.setCollisionByExclusion([-1, 6, 7, 8, 26]);
 
     //find a stairs
+    /*
     this.stuffLayer.setTileIndexCallback(TILES.STAIRS, () => {
       this.stuffLayer.setTileIndexCallback(TILES.STAIRS, null);
       this.hasPlayerReachedStairs = true;
@@ -206,13 +213,13 @@ export default class DungeonScene extends Phaser.Scene {
         this.scene.restart();
       });
     });
-
+*/
     //find a chest
     this.stuffLayer.setTileIndexCallback(TILES.CHEST, () => {
       this.stuffLayer.setTileIndexCallback(TILES.CHEST, null);
       this.player.hasWeapon = true;
       this.weapon = TILES.CHESTWEAPONS[Math.floor(Math.random() * (3 - 0)) + 0];
-      alert("Has encontrado un " + this.weapon);
+      //alert("Has encontrado un " + this.weapon);
       /*this.hasPlayerReachedStairs = true;
       this.player.freeze();
       const cam = this.cameras.main;
@@ -257,8 +264,8 @@ export default class DungeonScene extends Phaser.Scene {
     this.physics.add.collider(this.player.sprite, this.groundLayer);
     this.physics.add.collider(this.player.sprite, this.stuffLayer);
 
-    this.physics.add.collider(this.inteligencia, this.groundLayer);
-    this.physics.add.collider(this.inteligencia, this.stuffLayer);
+    //this.physics.add.collider(this.inteligencia, this.groundLayer);
+    //this.physics.add.collider(this.inteligencia, this.stuffLayer);
 
 
 
@@ -355,6 +362,28 @@ export default class DungeonScene extends Phaser.Scene {
 
   }
 
+  Ganar(){
+      this.player.update();
+      const px = this.groundLayer.worldToTileX(this.player.sprite.x);
+      const py = this.groundLayer.worldToTileY(this.player.sprite.y);
+
+      if( (px==this.endRoom.centerX || px==this.endRoom.centerX-1 || px==this.endRoom.centerX+1) && (py==this.endRoom.centerY || py==this.endRoom.centerY-1 || py==this.endRoom.centerY+1) ){
+        this.stuffLayer.setTileIndexCallback(TILES.STAIRS, () => {
+        this.stuffLayer.setTileIndexCallback(TILES.STAIRS, null);
+        this.hasPlayerReachedStairs = true;
+        this.player.freeze();
+        const cam = this.cameras.main;
+        cam.fade(250, 0, 0, 0);
+          cam.once("camerafadeoutcomplete", () => {
+            this.player.destroy();
+            this.scene.restart();
+          });
+        });
+        this.music.stop();
+        this.borralo=true;
+      }      
+  }
+
   invocarBicho(i){
     
     this.bichos.push(this.physics.add.sprite(this.restantes[i].x+60, this.restantes[i].y-60, 'enemigo2'));    
@@ -362,6 +391,15 @@ export default class DungeonScene extends Phaser.Scene {
     this.bichos[this.bichos.length-1].anims.play('enemigo2',true);
     this.physics.add.collider(this.bichos[this.bichos.length-1], this.groundLayer);
     this.physics.add.collider(this.bichos[this.bichos.length-1], this.stuffLayer);
+    //this.physics.add.collider(this.player.sprite,this.bichos[this.bichos.length-1]);
+    this.physics.add.overlap(this.player.sprite , this.bichos[this.bichos.length-1],()=>{
+        this.setLife(0);
+        alert("Game Over");
+        this.music.stop();
+        this.level=0;
+
+        this.scene.restart();
+    });
     this.bichos[this.bichos.length-1].setVelocity(80, 80);    
     this.bichos[this.bichos.length-1].setBounce(1, 1);        
     //alert("aprieten bien ese culo...\n que lo que viene es candela"); 
@@ -371,9 +409,11 @@ export default class DungeonScene extends Phaser.Scene {
 
 
   update(time, delta) {
-    if (this.hasPlayerReachedStairs){
-      this.music.stop();
+    if(this.borralo){
       return;
+    }
+    if (this.hasPlayerReachedStairs ){
+      this.Ganar();                  
     } 
     if(this.player.hasWeapon) this.setWeapon(this.weapon);
     this.player.update();
@@ -391,6 +431,12 @@ export default class DungeonScene extends Phaser.Scene {
         this.invocarRey();
         this.encuentro=false;        
       }
+    }
+    if(playerRoom==this.endRoom){
+      this.hasPlayerReachedStairs=true;
+    }
+    else{
+      this.hasPlayerReachedStairs=false;
     }
     if(this.restantes.length!=0){
       var aux=-1;
