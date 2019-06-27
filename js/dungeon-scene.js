@@ -51,6 +51,10 @@ export default class DungeonScene extends Phaser.Scene {
     this.load.audio('moon', [
         'assets/audio/DuckTales (NES)-The Moon Theme.mp3'
     ]);
+
+    this.load.audio('area5', [
+        'assets/audio/Area 5(NES)-Bionic Commando.mp3'
+    ]);
   }
 
   create() {
@@ -140,12 +144,12 @@ export default class DungeonScene extends Phaser.Scene {
     
     // Place stuff in the 90% "otherRooms"
     var trono = true;
-    var rx,ry,epx,epy;   
+    var rx,ry,arr=new Array();
     otherRooms.forEach(room => {
       var rand = Math.random();
-      if(!trono && epx == null){
-        epx=map.tileToWorldX(room.left)+5;
-        epy=map.tileToWorldX(room.bottom);
+      if(!trono && arr.length<5){
+        var obj = {x: map.tileToWorldX(room.left)+5, y: map.tileToWorldX(room.bottom)};
+        arr.push(obj);
       }
       if (rand <= 0.25) {
         // 25% chance of chest
@@ -180,8 +184,10 @@ export default class DungeonScene extends Phaser.Scene {
     this.reyX=rx;
     this.reyY=ry;
 
-    this.insectoX=epx;
-    this.insectoY=epy;
+    this.restantes=arr;
+
+    this.bichos = new Array();
+
 
     // Not exactly correct for the tileset since there are more possible floor tiles, but this will
     // do for the example.
@@ -244,11 +250,15 @@ export default class DungeonScene extends Phaser.Scene {
     const y = map.tileToWorldY(playerRoom.centerY);
     this.player = new Player(this, x, y);
 
-        
+//    this.inteligencia=this.physics.add.sprite(x + 40, y, 'rey');            
+//    this.inteligencia.anims.play('rey',true); 
 
     // Watch the player and tilemap layers for collisions, for the duration of the scene:
     this.physics.add.collider(this.player.sprite, this.groundLayer);
     this.physics.add.collider(this.player.sprite, this.stuffLayer);
+
+    this.physics.add.collider(this.inteligencia, this.groundLayer);
+    this.physics.add.collider(this.inteligencia, this.stuffLayer);
 
 
 
@@ -262,6 +272,7 @@ export default class DungeonScene extends Phaser.Scene {
     titulo.push('mpa');
     titulo.push('dancin');
     titulo.push('moon');
+    titulo.push('area5');
     this.music = this.sound.add(titulo[Math.floor(Math.random() * titulo.length)]);
     this.music.config.loop=true;
     this.music.play();
@@ -344,13 +355,15 @@ export default class DungeonScene extends Phaser.Scene {
 
   }
 
-  invocarBicho(){
-    this.insecto=this.physics.add.sprite(this.insectoX+60, this.insectoY-60, 'enemigo2');            
-    this.insecto.anims.play('enemigo2',true);
-    this.physics.add.collider(this.insecto,this.groundLayer);
-    this.physics.add.collider(this.insecto, this.stuffLayer);
-    this.insecto.setVelocity(80, 80);    
-    this.insecto.setBounce(1, 1);        
+  invocarBicho(i){
+    
+    this.bichos.push(this.physics.add.sprite(this.restantes[i].x+60, this.restantes[i].y-60, 'enemigo2'));    
+    this.restantes.splice(i,1);            
+    this.bichos[this.bichos.length-1].anims.play('enemigo2',true);
+    this.physics.add.collider(this.bichos[this.bichos.length-1], this.groundLayer);
+    this.physics.add.collider(this.bichos[this.bichos.length-1], this.stuffLayer);
+    this.bichos[this.bichos.length-1].setVelocity(80, 80);    
+    this.bichos[this.bichos.length-1].setBounce(1, 1);        
     //alert("aprieten bien ese culo...\n que lo que viene es candela"); 
 
   }
@@ -379,13 +392,20 @@ export default class DungeonScene extends Phaser.Scene {
         this.encuentro=false;        
       }
     }
-    if(this.insecto==null){
-      const colmenaTileX = this.groundLayer.worldToTileX(this.insectoX);
-      const colmenaTileY = this.groundLayer.worldToTileY(this.insectoY);
-      const colmena     = this.dungeon.getRoomAt(colmenaTileX, colmenaTileY);
-      if(colmena==playerRoom){
-        this.invocarBicho();      
+    if(this.restantes.length!=0){
+      var aux=-1;
+      for (var i in this.restantes){
+        const colmenaTileX = this.groundLayer.worldToTileX(this.restantes[i].x);
+        const colmenaTileY = this.groundLayer.worldToTileY(this.restantes[i].y);
+        const colmena     = this.dungeon.getRoomAt(colmenaTileX, colmenaTileY);
+        if(colmena==playerRoom){    
+          aux=i;      
+          break;      
+        }
       }
+      if(aux!=-1){
+        this.invocarBicho(aux);      
+      }        
     }
     
     this.tilemapVisibility.setActiveRoom(playerRoom);
