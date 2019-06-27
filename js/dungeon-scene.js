@@ -245,7 +245,7 @@ export default class DungeonScene extends Phaser.Scene {
         key: 'enemigo1',
         frames: this.anims.generateFrameNumbers('antifairy', { start: 0, end: 4 }),
         frameRate: 15,
-        repeat: -1
+        repeat: 1
       });
       this.anims.create({
         key: 'enemigo2',
@@ -393,6 +393,7 @@ export default class DungeonScene extends Phaser.Scene {
   //y que aparezcan sin que el jugador lo vea venir
 
   invocarRey(){
+    this.rey = new King(this, this.reyX, this.reyY);
     this.rey=this.physics.add.sprite(this.reyX, this.reyY, 'rey');            
     this.rey.anims.play('rey',true);        
     //alert("aprieten bien ese culo...\n que lo que viene es candela"); 
@@ -417,6 +418,7 @@ export default class DungeonScene extends Phaser.Scene {
     } 
     if(this.player.hasWeapon) this.setWeapon(this.weapon);
     this.player.update();
+    
 
     // Find the player's room using another helper method from the dungeon that converts from
     // dungeon XY (in grid units) to the corresponding room object
@@ -429,7 +431,7 @@ export default class DungeonScene extends Phaser.Scene {
       const palacio     = this.dungeon.getRoomAt(palacioTileX, palacioTileY);
       if(palacio==playerRoom){
         this.invocarRey();
-        alert("has encontrado al rey");
+        this.rey.update();
         this.encuentro=false;        
       }
     }

@@ -6,13 +6,13 @@ export default class REY {
 
     const anims = scene.anims;
     anims.create({
-      key: "player-walk",
+      key: "king-walk",
       frames: anims.generateFrameNumbers("characters", { start: 23, end: 26 }),
       frameRate: 8,
       repeat: -1
     });
     anims.create({
-      key: "player-walk-back",
+      key: "king-walk-back",
       frames: anims.generateFrameNumbers("characters", { start: 42, end: 45 }),
       frameRate: 8,
       repeat: -1
@@ -23,7 +23,7 @@ export default class REY {
       .setSize(22, 33)
       .setOffset(23, 27);
 
-    this.sprite.anims.play("player-walk-back");
+    this.sprite.anims.play("king-walk-back");
 
     this.keys = scene.input.keyboard.createCursorKeys();
   }
@@ -66,9 +66,9 @@ export default class REY {
 
     // Update the animation last and give left/right animations precedence over up/down animations
     if (keys.left.isDown || keys.right.isDown || keys.down.isDown) {
-      sprite.anims.play("player-walk", true);
+      sprite.anims.play("king-walk", true);
     } else if (keys.up.isDown) {
-      sprite.anims.play("player-walk-back", true);
+      sprite.anims.play("king-walk-back", true);
     } else {
       sprite.anims.stop();
 
